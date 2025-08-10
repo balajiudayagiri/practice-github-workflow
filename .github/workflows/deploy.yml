@@ -76,7 +76,7 @@ jobs:
         uses: schneegans/dynamic-badges-action@v1.6.0
         with:
           # Ensure GIST_SECRET is defined in your repository's GitHub Actions secrets
-          auth: ${{ secrets.URL}}
+          auth: ${{ secrets.GIST_SECRET }}
           gistID: YOUR_GIST_ID
           filename: deploy-status.json
           label: deployment
