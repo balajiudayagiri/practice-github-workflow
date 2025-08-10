@@ -76,7 +76,7 @@ jobs:
         uses: schneegans/dynamic-badges-action@v1.6.0
         with:
           # Ensure GIST_SECRET is defined in your repository's GitHub Actions secrets
-          auth: https://balajiudayagiri.github.io/practice-github-workflow/
+          auth: ${{ secrets.URL}}
           gistID: YOUR_GIST_ID
           filename: deploy-status.json
           label: deployment
