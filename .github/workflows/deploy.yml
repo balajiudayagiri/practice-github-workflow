@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to GitHub Pages shyama
+name: Deploy Static Content to GitHub Pages
 
 on:
   push:
@@ -11,25 +11,74 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  DEPLOY_TIME_START: ${{ github.event.repository.updated_at }}
+
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Start Deployment
+        run: |
+          echo "🚀 Starting deployment process..."
+          echo "Repository: ${{ github.repository }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Commit SHA: ${{ github.sha }}"
+
+      - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Setup Pages
+        with:
+          fetch-depth: 1
+
+      - name: Setup GitHub Pages
+        id: pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
 
-      - name: Upload artifact
+      - name: Get Repository Size
+        run: |
+          echo "📦 Repository size:"
+          du -sh .
+
+      - name: Validate Files
+        run: |
+          echo "📝 Checking files to be deployed..."
+          find . -type f -not -path '*/\.*' | wc -l
+
+      - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './'
+          path: "./"
+          retention-days: 7
+
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
 
+      - name: Deployment Summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "🌐 Site URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "⏱️ Deployment started at: ${{ env.DEPLOY_TIME_START }}"
+          echo "⏱️ Deployment completed at: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          DEPLOY_DURATION=$(($(date +%s) - $(date -d ${{ env.DEPLOY_TIME_START }} +%s)))
+          echo "⌛ Total deployment time: ${DEPLOY_DURATION} seconds"
+
+      - name: Status Badge
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        with:
+          # Ensure GIST_SECRET is defined in your repository's GitHub Actions secrets
+          auth: https://balajiudayagiri.github.io/practice-github-workflow/
+          gistID: YOUR_GIST_ID
+          filename: deploy-status.json
+          label: deployment
+          message: success
+          color: green
